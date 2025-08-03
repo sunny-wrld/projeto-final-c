@@ -13,14 +13,14 @@ Este projeto implementa um sistema de gerenciamento de arquivos em C usando uma 
 
 ## Estrutura do Projeto
 
-- `mai.c` - Arquivo principal com a interface do usuário e lógica do menu
+- `main.c` - Arquivo principal com a interface do usuário e lógica do menu
 - `arvore.h` - Implementação da árvore binária de busca e todas as operações
 - `dados_arquivos.txt` - Arquivo de dados com informações iniciais dos arquivos
 
 ## Como Compilar e Executar
 
 ```bash
-gcc mai.c -o sistema_arquivos
+gcc main.c -o sistema_arquivos
 ./sistema_arquivos
 ```
 
@@ -46,5 +46,6 @@ O sistema utiliza uma árvore binária de busca onde cada nó contém:
 - Data de modificação (DD/MM/AAAA)
 
 ## Autor
+Felipe Murilo Ribeiro Ribeiro
 
 Projeto desenvolvido como trabalho final para a disciplina de Estruturas de Dados.
