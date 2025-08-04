@@ -3,130 +3,142 @@
 #include <string.h>
 #include "arvore.h"
 
-// Funcao para exibir o menu
+// Exibe o menu principal
 void exibir_menu() {
-    printf("\n=== Sistema de Gerenciamento de Arquivos ===\n");
-    printf("1. Carregar dados iniciais (do arquivo)\n");
+    printf("\n=== MENU DO SISTEMA DE ARQUIVOS ===\n");
+    printf("1. Carregar dados do arquivo\n");
     printf("2. Inserir novo item\n");
-    printf("3. Buscar item por caminho\n");
+    printf("3. Buscar item pelo caminho\n");
     printf("4. Listar todos os itens (em ordem)\n");
-    printf("5. Calcular tamanho total de um diretorio\n");
-    printf("6. Listar Arvore Indentada\n");
+    printf("5. Calcular tamanho de um diretorio\n");
+    printf("6. Mostrar estrutura da arvore (indentada)\n");
     printf("7. Sair\n");
-    printf("Escolha uma opcaoo: ");
+    printf("Escolha uma opcao: ");
 }
 
 int main() {
-    tree arvore;
-    define(&arvore);
+    Arvore arvore;
+    inicializar(&arvore); // comeca com a arvore vazia
+
     int opcao;
     char caminho[100];
-    elemento novo_item;
-    
-    // Carregar dados iniciais do arquivo, esse int foi o gpt que gerou, pelo q entendi ja que esta dando erro e provalvelmente vai retornar umm intiero se botar int na frente vai funcionar
-    int itens_iniciais = carregar_dados_arquivo(&arvore, "dados_arquivos.txt");
-    if (itens_iniciais == 0) {
-        // Tenta buscar na pasta pai se nao encontrou na pasta atual
-        itens_iniciais = carregar_dados_arquivo(&arvore, "../dados_arquivos.txt");
-    }
-    
+    Item novo_item;
+
+    // Tenta carregar os dados do arquivo padrao
+    int itens_iniciais = carregarArquivo(&arvore, "dados_arquivos.txt");
+
     if (itens_iniciais > 0) {
-        printf("Sistema iniciado! %d itens carregados do arquivo.\n", itens_iniciais);
+        printf("Sistema iniciado com sucesso! %d itens carregados.\n", itens_iniciais);
     } else {
-        printf("Aviso: Nenhum item foi carregado. Verifique se o arquivo 'dados_arquivos.txt' existe.\n");
+        printf("Nenhum dado foi carregado. Verifique o arquivo 'dados_arquivos.txt'.\n");
     }
 
     do {
         exibir_menu();
         scanf("%d", &opcao);
         getchar();
+        getchar();
 
         switch (opcao) {
             case 1:
-                // Recarregar do arquivo
-                define(&arvore); // limpa a arvore
-                 // Carregar dados iniciais do arquivo, esse int foi o gpt que gerou
-                int itens_carregados = carregar_dados_arquivo(&arvore, "dados_arquivos.txt");
-                if (itens_carregados == 0) {
-                    // Tenta buscar na pasta pai se nao encontrou na pasta atual
-                    itens_carregados = carregar_dados_arquivo(&arvore, "../dados_arquivos.txt");
-                }
-                
+                // Recarrega os dados do arquivo
+                inicializar(&arvore); // limpa a arvore atual
+                int itens_carregados = carregarArquivo(&arvore, "dados_arquivos.txt");
+
                 if (itens_carregados > 0) {
-                    printf("Dados iniciais carregados com sucesso! %d itens carregados.\n", itens_carregados);
+                    printf("Arquivo carregado com sucesso! %d itens inseridos.\n", itens_carregados);
                 } else {
-                    printf("Erro ao carregar dados ou arquivo vazio.\n");
+                    printf("Erro ao carregar os dados. Verifique se o arquivo existe.\n");
                 }
                 break;
+
             case 2:
-                // Inserir novo item
+                // Cadastra novo item
+
                 printf("Digite o caminho completo: ");
-                fgets(novo_item.caminho_completo, 100, stdin);
-                novo_item.caminho_completo[strcspn(novo_item.caminho_completo, "\n")] = 0; // Remover nova linha
+                fgets(novo_item.caminho, 100, stdin);
+                novo_item.caminho[strcspn(novo_item.caminho, "\n")] = 0;
 
-                printf("Digite o tipo (0 para arquivo, 1 para diretorio): ");
+                printf("Digite o tipo 0 para arquivo e 1 para diretorio: ");
                 scanf("%d", &novo_item.tipo);
+
                 printf("Digite o tamanho em KB: ");
-                scanf("%d", &novo_item.tamanho_kb);
+                scanf("%d", &novo_item.tamanho);
+
+                // usei a ia so pra ver como inseria a data
                 printf("Digite a data de modificacao (DD/MM/AAAA): ");
-                scanf("%d/%d/%d", &novo_item.data_modificacao.dia, &novo_item.data_modificacao.mes, &novo_item.data_modificacao.ano);
-                getchar();
+                scanf("%d/%d/%d", &novo_item.modificacao.dia,
+                                  &novo_item.modificacao.mes,
+                                  &novo_item.modificacao.ano);
                 getchar();
 
-                if (inserir_item(&arvore, novo_item)) {
-                    printf("Item inserido com sucesso.\n");
+                if (inserir(&arvore, novo_item)) {
+                    printf("Item inserido com sucesso!\n");
                 } else {
-                    printf("Erro: item com o mesmo caminho ja existe.\n");
+                    printf("Ja existe um item com esse caminho.\n");
                 }
                 break;
-            case 3:
-                // Buscar item por caminho
-                printf("Digite o caminho do item: ");
-                fgets(caminho, 100, stdin);
-                caminho[strcspn(caminho, "\n")] = 0; // Remover nova linha
 
-                ptrNodo resultado = buscar_item(arvore, caminho);
-                if (resultado != NULL) {
+            case 3:
+                // Busca pelo caminho
+                printf("Digite o caminho: ");
+                fgets(caminho, 100, stdin);
+                caminho[strcspn(caminho, "\n")] = 0;
+
+                PtrNo encontrado = buscar(arvore, caminho);
+                if (encontrado != NULL) {
+                    char *tipoTexto;
+                    if (encontrado->dados.tipo == 0) {
+                        tipoTexto = "Arquivo";
+                    } else {
+                        tipoTexto = "Diretorio";
+                    }
+                    
                     printf("Item encontrado: %s - %s - %d KB - %02d/%02d/%04d\n",
-                           resultado->info.caminho_completo,
-                           resultado->info.tipo == 0 ? "Arquivo" : "Diretorio",
-                           resultado->info.tamanho_kb,
-                           resultado->info.data_modificacao.dia,
-                           resultado->info.data_modificacao.mes,
-                           resultado->info.data_modificacao.ano);
+                        encontrado->dados.caminho,
+                        tipoTexto,
+                        encontrado->dados.tamanho,
+                        encontrado->dados.modificacao.dia,
+                        encontrado->dados.modificacao.mes,
+                        encontrado->dados.modificacao.ano);
                 } else {
                     printf("Item nao encontrado.\n");
                 }
                 break;
+
             case 4:
-                // Listar todos os itens em ordem
-                listar_todos_itens_em_ordem(arvore);
+                // Listar em ordem
+                listarEmOrdem(arvore);
                 break;
+
             case 5:
-                // Calcular tamanho total de um diretorio
+                // Tamanho total de um diretorio
                 printf("Digite o caminho do diretorio: ");
                 fgets(caminho, 100, stdin);
-                caminho[strcspn(caminho, "\n")] = 0; // Remover nova linha
+                caminho[strcspn(caminho, "\n")] = 0;
 
-                int tamanho_total = calcular_tamanho_total_diretorio(arvore, caminho);
-                if (tamanho_total == -1) {
-                    printf("Diretorio nao encontrado ou nao e um diretorio.\n");
+                int total = tamanhoTotalDiretorio(arvore, caminho);
+                if (total == -1) {
+                    printf("Diretorio nao encontrado ou o caminho e de um arquivo.\n");
                 } else {
-                    printf("Tamanho total do diretorio: %d KB\n", tamanho_total);
+                    printf("Tamanho total: %d KB\n", total);
                 }
                 break;
+
             case 6:
-                // Listar arvore indentada
-                listar_arvore_indentada(arvore);
+                // Exibe estrutura da arvore
+                mostrarEstrutura(arvore);
                 break;
+
             case 7:
-                // Sair
-                printf("Saindo do programa...\n");
+                printf("Encerrando o programa...\n");
                 break;
+
             default:
                 printf("Opcao invalida. Tente novamente.\n");
                 break;
         }
+
     } while (opcao != 7);
 
     return 0;

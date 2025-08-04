@@ -2,194 +2,182 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Estrutura que guarda uma data simples
 typedef struct {
     int dia;
     int mes;
     int ano;
 } Data;
 
+// Estrutura que representa um arquivo ou pasta
 typedef struct {
-    char caminho_completo[100];
+    char caminho[100];
     int tipo;
-    int tamanho_kb;
-    Data data_modificacao;
-} elemento;
+    int tamanho;
+    Data modificacao;
+} Item;
 
-typedef struct nodo *ptrNodo;
-struct nodo {
-    elemento info;
-    ptrNodo esq;
-    ptrNodo dir;
+// No da arvore
+typedef struct No *PtrNo;
+struct No {
+    Item dados;
+    PtrNo esquerda;
+    PtrNo direita;
 };
 
-typedef ptrNodo tree;
+typedef PtrNo Arvore;
 
-void define(tree *t) {
-    *t = NULL;
+// Inicia a arvore
+void inicializar(Arvore *raiz) {
+    *raiz = NULL;
 }
 
-void criaRaiz(tree *t, elemento item) {
-    tree no = (ptrNodo)malloc(sizeof(struct nodo));
-    no->esq = NULL;
-    no->dir = NULL;
-    no->info = item;
-    *t = no;
+// Cria a raiz da arvore
+void criarRaiz(Arvore *raiz, Item novo) {
+    Arvore novoNo = (PtrNo)malloc(sizeof(struct No));
+    novoNo->dados = novo;
+    novoNo->esquerda = NULL;
+    novoNo->direita = NULL;
+    *raiz = novoNo;
 }
 
-int vazia(tree t) {
-    return (t == NULL);
+// Verifica se a arvore esta vazia
+int estaVazia(Arvore raiz) {
+    return (raiz == NULL);
 }
 
-void criarNodoDir(tree t, elemento item) {
-    tree no = (ptrNodo)malloc(sizeof(struct nodo));
-    no->esq = NULL;
-    no->dir = NULL;
-    no->info = item;
-    t->dir = no;
-}
-
-void criarNodoEsq(tree t, elemento item) {
-    tree no = (ptrNodo)malloc(sizeof(struct nodo));
-    no->esq = NULL;
-    no->dir = NULL;
-    no->info = item;
-    t->esq = no;
-}
-
-int inserir_item(tree *t, elemento item) {
-    if (*t == NULL) {
-        criaRaiz(t, item);
+// Insere um novo item na arvore
+int inserir(Arvore *raiz, Item novo) {
+    if (*raiz == NULL) {
+        criarRaiz(raiz, novo);
         return 1;
     }
-    
-    int comp = strcmp(item.caminho_completo, (*t)->info.caminho_completo);
-    
+
+    int comp = strcmp(novo.caminho, (*raiz)->dados.caminho);
+
     if (comp < 0) {
-        if ((*t)->esq == NULL) {
-            criarNodoEsq(*t, item);
-            return 1;
-        } else {
-            return inserir_item(&((*t)->esq), item);
-        }
+        return inserir(&((*raiz)->esquerda), novo);
     } else if (comp > 0) {
-        if ((*t)->dir == NULL) {
-            criarNodoDir(*t, item);
-            return 1;
+        return inserir(&((*raiz)->direita), novo);
+    }
+    
+    return 0;
+}
+
+// Busca item pelo caminho
+PtrNo buscar(Arvore raiz, char *caminho) {
+    if (raiz == NULL) return NULL;
+
+    int comp = strcmp(caminho, raiz->dados.caminho);
+
+    if (comp == 0) return raiz;
+    else if (comp < 0) return buscar(raiz->esquerda, caminho);
+    else return buscar(raiz->direita, caminho);
+}
+
+//tive um auxilio do sonnet pra arrumar a estrutura
+// Lista os itens em ordem (ordenado pelo caminho)
+void listarEmOrdem(Arvore raiz) {
+    if (raiz != NULL) {
+        listarEmOrdem(raiz->esquerda);
+
+        char *tipoTexto;
+        if (raiz->dados.tipo == 0) {
+            tipoTexto = "Arquivo";
         } else {
-            return inserir_item(&((*t)->dir), item);
+            tipoTexto = "Diretorio";
         }
-    }
-    return 0; // ja existe
-}
 
-ptrNodo buscar_item(tree t, char *caminho) {
-    if (t == NULL) return NULL;
-    
-    int comp = strcmp(caminho, t->info.caminho_completo);
-    
-    if (comp == 0) return t;
-    if (comp < 0) return buscar_item(t->esq, caminho);
-    return buscar_item(t->dir, caminho);
-}
+        printf("%s - %s - %d KB - %02d/%02d/%04d\n",
+               raiz->dados.caminho,
+               tipoTexto,
+               raiz->dados.tamanho,
+               raiz->dados.modificacao.dia,
+               raiz->dados.modificacao.mes,
+               raiz->dados.modificacao.ano);
 
-void listar_todos_itens_em_ordem(tree t) {
-    if (t != NULL) {
-        listar_todos_itens_em_ordem(t->esq);
-        
-        printf("%s - %s - %d KB - %02d/%02d/%04d\n", 
-               t->info.caminho_completo,
-               t->info.tipo == 0 ? "Arquivo" : "Diretorio",
-               t->info.tamanho_kb,
-               t->info.data_modificacao.dia,
-               t->info.data_modificacao.mes,
-               t->info.data_modificacao.ano);
-        
-        listar_todos_itens_em_ordem(t->dir);
+        listarEmOrdem(raiz->direita);
     }
 }
 
-int calcula_tamanho_aux(tree t, char *dir) {
-    if (t == NULL) return 0;
-    
+// Calcula tamanho total dos arquivos dentro de um diretorio
+int somaTamanho(Arvore raiz, char *diretorio) {
+    if (raiz == NULL) return 0;
+
     int total = 0;
-    
-    total += calcula_tamanho_aux(t->esq, dir);
-    
-    if (t->info.tipo == 0) { // se e arquivo
-        if (strstr(t->info.caminho_completo, dir) == t->info.caminho_completo) {
-            total += t->info.tamanho_kb;
+    total += somaTamanho(raiz->esquerda, diretorio);
+
+    if (raiz->dados.tipo == 0) {
+        if (strstr(raiz->dados.caminho, diretorio) == raiz->dados.caminho) {
+            total += raiz->dados.tamanho;
         }
     }
-    
-    total += calcula_tamanho_aux(t->dir, dir);
-    
+
+    total += somaTamanho(raiz->direita, diretorio);
     return total;
 }
 
-int calcular_tamanho_total_diretorio(tree t, char *caminho_diretorio) {
-    ptrNodo dir = buscar_item(t, caminho_diretorio);
-    if (dir == NULL || dir->info.tipo == 0) {
-        return -1;
-    }
-    
-    return calcula_tamanho_aux(t, caminho_diretorio);
+int tamanhoTotalDiretorio(Arvore raiz, char *diretorio) {
+    PtrNo encontrado = buscar(raiz, diretorio);
+    if (encontrado == NULL || encontrado->dados.tipo == 0) return -1;
+
+    return somaTamanho(raiz, diretorio);
 }
 
-// Feita de maneira integral pelo gpt
-void lista_indentada_aux(tree t) {
-    if (t != NULL) {
-        lista_indentada_aux(t->esq);
-        
-        // conta quantas barras tem para saber o nivel
+// Foi o sonnet que fez, pois nao entendi como se faz isso e quando tentei tive mt dificuldade
+// Mostra os itens em formato de arvore com indentacao
+void mostrarIndentadoAux(Arvore raiz) {
+    if (raiz != NULL) {
+        mostrarIndentadoAux(raiz->esquerda);
+
         int nivel = 0;
-        for (int i = 0; t->info.caminho_completo[i] != '\0'; i++) {
-            if (t->info.caminho_completo[i] == '/') nivel++;
+        for (int i = 0; raiz->dados.caminho[i] != '\0'; i++) {
+            if (raiz->dados.caminho[i] == '/') nivel++;
         }
-        
-        // imprime espaços
+
         for (int i = 0; i < nivel; i++) printf("  ");
-        
-        // pega so o nome final
-        char *nome = strrchr(t->info.caminho_completo, '/');
-        if (nome == NULL) nome = t->info.caminho_completo;
+
+        char *nome = strrchr(raiz->dados.caminho, '/');
+        if (nome == NULL) nome = raiz->dados.caminho;
         else nome++;
-        
+
         printf("%s", nome);
-        if (t->info.tipo == 1) printf("/");
+        if (raiz->dados.tipo == 1) printf("/");
         printf("\n");
-        
-        lista_indentada_aux(t->dir);
+
+        mostrarIndentadoAux(raiz->direita);
     }
 }
 
-void listar_arvore_indentada(tree t) {
-    lista_indentada_aux(t);
+void mostrarEstrutura(Arvore raiz) {
+    mostrarIndentadoAux(raiz);
 }
 
-int carregar_dados_arquivo(tree *t, char *arquivo) {
-    FILE *f = fopen(arquivo, "r");
-    if (f == NULL) return 0;
-    
+// Tive o auxilio do sonnet pq estava dando erro devido a formatacao nao consegui resolver
+// Carrega dados de um arquivo de texto
+int carregarArquivo(Arvore *raiz, char *nomeArquivo) {
+    FILE *arquivo = fopen(nomeArquivo, "r");
+    if (arquivo == NULL) return 0;
+
     char linha[200];
-    int count = 0;
-    
-    while (fgets(linha, 200, f)) {
-        elemento item;
-        char tipo[20], data[20];
-        
-        sscanf(linha, "%[^,],%[^,],%d,%s", item.caminho_completo, tipo, &item.tamanho_kb, data);
-        
-        if (strcmp(tipo, "arquivo") == 0) {
-            item.tipo = 0;
-        } else {
-            item.tipo = 1;
-        }
-        
-        sscanf(data, "%d/%d/%d", &item.data_modificacao.dia, &item.data_modificacao.mes, &item.data_modificacao.ano);
-        
-        if (inserir_item(t, item)) count++;
+    int adicionados = 0;
+
+    while (fgets(linha, sizeof(linha), arquivo)) {
+        Item novo;
+        char tipoStr[20], dataStr[20];
+
+        sscanf(linha, "%[^,],%[^,],%d,%s", novo.caminho, tipoStr, &novo.tamanho, dataStr);
+
+        if (strcmp(tipoStr, "arquivo") == 0)
+            novo.tipo = 0;
+        else
+            novo.tipo = 1;
+
+        sscanf(dataStr, "%d/%d/%d", &novo.modificacao.dia, &novo.modificacao.mes, &novo.modificacao.ano);
+
+        if (inserir(raiz, novo)) adicionados++;
     }
-    
-    fclose(f);
-    return count;
+
+    fclose(arquivo);
+    return adicionados;
 }
