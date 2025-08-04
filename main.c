@@ -127,6 +127,7 @@ int main() {
                 break;
 
             case 6:
+                // Foi o sonnet que fez essa funcao inteira, pois nao entendi como se faz isso e quando tentei tive mt dificuldade
                 // Exibe estrutura da arvore
                 mostrarEstrutura(arvore);
                 break;
