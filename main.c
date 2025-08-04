@@ -3,7 +3,7 @@
 #include <string.h>
 #include "arvore.h"
 
-// Exibe o menu principal
+//  menu principal
 void exibir_menu() {
     printf("\n=== MENU DO SISTEMA DE ARQUIVOS ===\n");
     printf("1. Carregar dados do arquivo\n");
@@ -24,7 +24,7 @@ int main() {
     char caminho[100];
     Item novo_item;
     
-    // usei o sonnet pra ajudar por algum motivo estava dando erro. ele adicionou o int na frente
+    // usei o sonnet pra ajudar por algum motivo estava dando erro. ele adicionou o int na frente e tirou do if else
     // Tenta carregar os dados do arquivo padrao
     int itens_iniciais = carregarArquivo(&arvore, "dados_arquivos.txt");
 
@@ -118,6 +118,7 @@ int main() {
                 fgets(caminho, 100, stdin);
                 caminho[strcspn(caminho, "\n")] = 0;
 
+                // era pra esta na tad mas tava dando erro
                 int total = tamanhoTotalDiretorio(arvore, caminho);
                 if (total == -1) {
                     printf("Diretorio nao encontrado ou o caminho e de um arquivo.\n");
