@@ -10,7 +10,7 @@ typedef struct {
 
 typedef struct {
     char caminho_completo[100];
-    int tipo; // 0 = arquivo, 1 = diretório
+    int tipo;
     int tamanho_kb;
     Data data_modificacao;
 } elemento;
@@ -79,7 +79,7 @@ int inserir_item(tree *t, elemento item) {
             return inserir_item(&((*t)->dir), item);
         }
     }
-    return 0; // já existe
+    return 0; // ja existe
 }
 
 ptrNodo buscar_item(tree t, char *caminho) {
@@ -115,7 +115,7 @@ int calcula_tamanho_aux(tree t, char *dir) {
     
     total += calcula_tamanho_aux(t->esq, dir);
     
-    if (t->info.tipo == 0) { // se é arquivo
+    if (t->info.tipo == 0) { // se e arquivo
         if (strstr(t->info.caminho_completo, dir) == t->info.caminho_completo) {
             total += t->info.tamanho_kb;
         }
@@ -129,17 +129,18 @@ int calcula_tamanho_aux(tree t, char *dir) {
 int calcular_tamanho_total_diretorio(tree t, char *caminho_diretorio) {
     ptrNodo dir = buscar_item(t, caminho_diretorio);
     if (dir == NULL || dir->info.tipo == 0) {
-        return -1; // não encontrou ou não é diretório
+        return -1;
     }
     
     return calcula_tamanho_aux(t, caminho_diretorio);
 }
 
+// Feita de maneira integral pelo gpt
 void lista_indentada_aux(tree t) {
     if (t != NULL) {
         lista_indentada_aux(t->esq);
         
-        // conta quantas barras tem para saber o nível
+        // conta quantas barras tem para saber o nivel
         int nivel = 0;
         for (int i = 0; t->info.caminho_completo[i] != '\0'; i++) {
             if (t->info.caminho_completo[i] == '/') nivel++;
@@ -148,7 +149,7 @@ void lista_indentada_aux(tree t) {
         // imprime espaços
         for (int i = 0; i < nivel; i++) printf("  ");
         
-        // pega só o nome final
+        // pega so o nome final
         char *nome = strrchr(t->info.caminho_completo, '/');
         if (nome == NULL) nome = t->info.caminho_completo;
         else nome++;
@@ -178,7 +179,11 @@ int carregar_dados_arquivo(tree *t, char *arquivo) {
         
         sscanf(linha, "%[^,],%[^,],%d,%s", item.caminho_completo, tipo, &item.tamanho_kb, data);
         
-        item.tipo = (strcmp(tipo, "arquivo") == 0) ? 0 : 1;
+        if (strcmp(tipo, "arquivo") == 0) {
+            item.tipo = 0;
+        } else {
+            item.tipo = 1;
+        }
         
         sscanf(data, "%d/%d/%d", &item.data_modificacao.dia, &item.data_modificacao.mes, &item.data_modificacao.ano);
         
