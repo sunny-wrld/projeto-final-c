@@ -23,7 +23,8 @@ int main() {
     int opcao;
     char caminho[100];
     Item novo_item;
-
+    
+    // usei o sonnet pra ajudar por algum motivo estava dando erro. ele adicionou o int na frente
     // Tenta carregar os dados do arquivo padrao
     int itens_iniciais = carregarArquivo(&arvore, "dados_arquivos.txt");
 
