@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Estrutura que guarda uma data simples
+// data
 typedef struct {
     int dia;
     int mes;
     int ano;
 } Data;
 
-// Estrutura que representa um arquivo ou pasta
+//arquivo ou pasta
 typedef struct {
     char caminho[100];
     int tipo;
@@ -32,7 +32,7 @@ void inicializar(Arvore *raiz) {
     *raiz = NULL;
 }
 
-// Cria a raiz da arvore
+// Cria a raiz
 void criarRaiz(Arvore *raiz, Item novo) {
     Arvore novoNo = (PtrNo)malloc(sizeof(struct No));
     novoNo->dados = novo;
@@ -46,7 +46,7 @@ int estaVazia(Arvore raiz) {
     return (raiz == NULL);
 }
 
-// Insere um novo item na arvore
+// Insere na arvore
 int inserir(Arvore *raiz, Item novo) {
     if (*raiz == NULL) {
         criarRaiz(raiz, novo);
@@ -64,7 +64,7 @@ int inserir(Arvore *raiz, Item novo) {
     return 0;
 }
 
-// Busca item pelo caminho
+// Busca item pelo caminho dado
 PtrNo buscar(Arvore raiz, char *caminho) {
     if (raiz == NULL) return NULL;
 
@@ -100,7 +100,7 @@ void listarEmOrdem(Arvore raiz) {
     }
 }
 
-// Calcula tamanho total dos arquivos dentro de um diretorio
+// Calcula tamanho de um diretorio
 int somaTamanho(Arvore raiz, char *diretorio) {
     if (raiz == NULL) return 0;
 
