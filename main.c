@@ -9,7 +9,7 @@ Daniel Lewi */
 
 //  menu principal
 void exibir_menu() {
-    printf("\n=== MENU DO SISTEMA DE ARQUIVOS ===\n");
+    printf("\n=== SISTEMA DE GERENCIAMENTO DE ARQUIVOS ===\n");
     printf("1. Carregar dados do arquivo\n");
     printf("2. Inserir novo item\n");
     printf("3. Buscar item pelo caminho\n");
