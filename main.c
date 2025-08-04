@@ -1,3 +1,7 @@
+/* Felipe Murilo Ribeiro
+Elia Carlos
+Daniel Lewi */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +22,7 @@ void exibir_menu() {
 
 int main() {
     Arvore arvore;
-    inicializar(&arvore); // comeca com a arvore vazia
+    inicializar(&arvore); // comeca com a arvore vazia por isso e O(1)
 
     int opcao;
     char caminho[100];
@@ -44,7 +48,7 @@ int main() {
             case 1:
                 // Recarrega os dados do arquivo
                 inicializar(&arvore); // limpa a arvore atual
-                int itens_carregados = carregarArquivo(&arvore, "dados_arquivos.txt");
+                int itens_carregados = carregarArquivo(&arvore, "dados_arquivos.txt"); //-> Melhor caso: O(m * log n)
 
                 if (itens_carregados > 0) {
                     printf("Arquivo carregado com sucesso! %d itens inseridos.\n", itens_carregados);
@@ -55,9 +59,9 @@ int main() {
 
             case 2:
                 // Cadastra novo item
-
-                printf("Digite o caminho completo: ");
-                fgets(novo_item.caminho, 100, stdin);
+                // Melhor caso: O(log n) pior O(n)
+                printf("Digite o caminho completo: "); 
+                fgets(novo_item.caminho, 100, stdin); 
                 novo_item.caminho[strcspn(novo_item.caminho, "\n")] = 0;
 
                 printf("Digite o tipo 0 para arquivo e 1 para diretorio: ");
@@ -81,7 +85,7 @@ int main() {
                 break;
 
             case 3:
-                // Busca pelo caminho
+                // Busca pelo caminho a complexidade e melhor caso: O(log n) e na pior e  O(n)
                 printf("Digite o caminho: ");
                 fgets(caminho, 100, stdin);
                 caminho[strcspn(caminho, "\n")] = 0;
@@ -108,12 +112,12 @@ int main() {
                 break;
 
             case 4:
-                // Listar em ordem
+                // Listar em ordem a complexidade e O(n)
                 listarEmOrdem(arvore);
                 break;
 
             case 5:
-                // Tamanho total de um diretorio
+                // Tamanho total de um diretorio O(n)
                 printf("Digite o caminho do diretorio: ");
                 fgets(caminho, 100, stdin);
                 caminho[strcspn(caminho, "\n")] = 0;
@@ -129,8 +133,8 @@ int main() {
 
             case 6:
                 // Foi o sonnet que fez essa funcao inteira, pois nao entendi como se faz isso e quando tentei tive mt dificuldade
-                // Exibe estrutura da arvore
-                mostrarEstrutura(arvore);
+                // Exibe estrutura da arvore O(n)
+                mostrarEstrutura(arvore); 
                 break;
 
             case 7:
